@@ -15,5 +15,10 @@ func Validate(request model.CreateProductRequest) {
 		validation.Field(&request.Quantity, validation.Required, validation.Min(0)),
 	)
 
-	exception.PanicIfNeeded(err)
+	// exception.PanicIfNeeded(err)
+	if err != nil {
+		panic(exception.ValidationError{
+			Message: err.Error(),
+		})
+	}
 }
