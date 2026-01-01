@@ -27,9 +27,17 @@ func main() {
 		panic(fmt.Errorf("Fatal error config file: %w \n", err))
 	}
 
-	db, err := app.NewDatabase(config)
+	// db, err := app.NewDatabase(config)
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error database: %w \n", err))
+	// }
+
+	log := app.NewLogger(config)
+	log.Info("Start Application")
+
+	db, err := app.NewDatabase(config, log)
 	if err != nil {
-		panic(fmt.Errorf("Fatal error database: %w \n", err))
+		panic(fmt.Errorf("Fatal Error Database: %w\n", err))
 	}
 
 	// Run migrate if argument is migrate
@@ -42,10 +50,16 @@ func main() {
 	}
 
 	transaction := db.Begin()
-	err = SaveUser(transaction)
+	// err = SaveUser(transaction)
+	// if err != nil {
+	// 	fmt.Printf("Error save user: %s \n", err.Error())
+	// }
+
+	users, err := FindUserWithContact(transaction)
 	if err != nil {
-		fmt.Printf("Error save user: %s \n", err.Error())
+		fmt.Printf("Error find user: %s \n", err.Error())
 	}
+	log.Info(users)
 
 	connection, _ := db.DB()
 	connection.Close()
@@ -79,6 +93,47 @@ func setupHTTPMongoProduct(db *mongo.Database) *fiber.App {
 }
 
 func RunMigration(db *gorm.DB) error {
+	return nil
+}
+
+func FindUserWithContact(db *gorm.DB) ([]entity.User, error) {
+	var users []entity.User
+	err := db.Model(&entity.User{}).Preload("Contacts").Find(&users).Error
+	return users, err
+}
+
+func SaveContact(db *gorm.DB) error {
+	defer db.Rollback()
+
+	err := db.Create(&entity.Contact{
+		ID:        "1",
+		FirstName: "Affandi",
+		LastName:  "Syihabuddin",
+		Email:     "affandi@gmail.com",
+		Phone:     "080181008",
+		UserId:    "1",
+	}).Error
+	if err != nil {
+		return err
+	}
+
+	err = db.Create(&entity.Contact{
+		ID:        "2",
+		FirstName: "Affandiss",
+		LastName:  "Syihabuddinss",
+		Email:     "sss@gmail.com",
+		Phone:     "080181008",
+		UserId:    "2",
+	}).Error
+	if err != nil {
+		return err
+	}
+
+	err = db.Commit().Error
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
