@@ -36,8 +36,10 @@ func (c *UserController) Routes(app *fiber.App) {
 }
 
 func (c *UserController) Register(ctx *fiber.Ctx) error {
-	var request model.RegisterUserRequest
-	err := ctx.BodyParser(&request)
+	// var request model.RegisterUserRequest
+	// err := ctx.BodyParser(&request)
+	request := new(model.RegisterUserRequest)
+	err := ctx.BodyParser(request)
 	if err != nil {
 		c.Log.Warnf("Failed to parse request body: %+v", err)
 		return err
@@ -70,13 +72,15 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 		return fiber.ErrConflict
 	}
 
-	user := entity.User{
+	// user := entity.User{
+	user := &entity.User{
 		ID:       request.ID,
 		Password: string(password),
 		Name:     request.Name,
 	}
 
-	err = tx.Create(&user).Error
+	// err = tx.Create(&user).Error
+	err = tx.Create(user).Error
 	if err != nil {
 		c.Log.Warnf("Failed create user to database: %+v", err)
 		return err
@@ -88,8 +92,10 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 }
 
 func (c *UserController) Login(ctx *fiber.Ctx) error {
-	var request model.LoginUserRequest
-	err := ctx.BodyParser(&request)
+	// var request model.LoginUserRequest
+	// err := ctx.BodyParser(&request)
+	request := new(model.LoginUserRequest)
+	err := ctx.BodyParser(request)
 	if err != nil {
 		c.Log.Warnf("Failed to parse request body: %+v", err)
 		return err
@@ -105,8 +111,10 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
-	var user entity.User
-	err = tx.Take(&user, "id = ?", request.ID).Error
+	// var user entity.User
+	// err = tx.Take(&user, "id = ?", request.ID).Error
+	user := new(entity.User)
+	err = tx.Take(user, "id = ?", request.ID).Error
 	if err != nil {
 		c.Log.Warnf("Failed find user by id: %+v", err)
 		return err
@@ -119,7 +127,8 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 	}
 
 	user.Token = uuid.New().String()
-	err = tx.Save(&user).Error
+	// err = tx.Save(&user).Error
+	err = tx.Save(user).Error
 	if err != nil {
 		c.Log.Warnf("Failed save user: %+v", err)
 		return err
@@ -151,8 +160,10 @@ func (c *UserController) Current(ctx *fiber.Ctx) error {
 	tx := c.DB.Begin(&sql.TxOptions{ReadOnly: true})
 	defer tx.Rollback()
 
-	var user entity.User
-	err := tx.Take(&user, "token = ?", token).Error
+	// var user entity.User
+	// err := tx.Take(&user, "token = ?", token).Error
+	user := new(entity.User)
+	err := tx.Take(user, "token = ?", token).Error
 	if err != nil {
 		c.Log.Warnf("Failed find user by token: %+v", err)
 		return err
@@ -174,15 +185,18 @@ func (c *UserController) Logout(ctx *fiber.Ctx) error {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
-	var user entity.User
-	err := tx.Take(&user, "token = ?", token).Error
+	// var user entity.User
+	// err := tx.Take(&user, "token = ?", token).Error
+	user := new(entity.User)
+	err := tx.Take(user, "token = ?", token).Error
 	if err != nil {
 		c.Log.Warnf("Failed find user by token: %+v", err)
 		return err
 	}
 
 	user.Token = ""
-	err = tx.Save(&user).Error
+	// err = tx.Save(&user).Error
+	err = tx.Save(user).Error
 	if err != nil {
 		c.Log.Warnf("Failed save user: %+v", err)
 		return err
@@ -199,15 +213,19 @@ func (c *UserController) Update(ctx *fiber.Ctx) error {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
-	var user entity.User
-	err := tx.Take(&user, "token = ?", token).Error
+	// var user entity.User
+	// err := tx.Take(&user, "token = ?", token).Error
+	user := new(entity.User)
+	err := tx.Take(user, "Token = ?", token).Error
 	if err != nil {
 		c.Log.Warnf("Failed find user by token: %+v", err)
 		return err
 	}
 
-	var request model.UpdateUserRequest
-	err = ctx.BodyParser(&request)
+	// var request model.UpdateUserRequest
+	// err = ctx.BodyParser(&request)
+	request := new(model.UpdateUserRequest)
+	err = ctx.BodyParser(request)
 	if err != nil {
 		c.Log.Warnf("Failed to parse request body: %+v", err)
 		return err
@@ -232,7 +250,8 @@ func (c *UserController) Update(ctx *fiber.Ctx) error {
 		user.Password = string(password)
 	}
 
-	err = tx.Save(&user).Error
+	// err = tx.Save(&user).Error
+	err = tx.Save(user).Error
 	if err != nil {
 		c.Log.Warnf("Failed save user: %+v", err)
 		return err
