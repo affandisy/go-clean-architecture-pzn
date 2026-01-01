@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"embed"
+	"errors"
 	"fmt"
 	"go-clean-architecture-pzn/app"
 	"go-clean-architecture-pzn/domain/entity"
@@ -9,9 +11,11 @@ import (
 	productRepo "go-clean-architecture-pzn/module/product/datasource"
 	controller "go-clean-architecture-pzn/module/product/transport"
 	productSvc "go-clean-architecture-pzn/module/product/usecase"
-	"os"
 
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +23,7 @@ import (
 )
 
 // go:embed migrations
-// var fs embed.FS
+var fs embed.FS
 
 func main() {
 	config, err := app.NewConfig()
@@ -41,12 +45,17 @@ func main() {
 	}
 
 	// Run migrate if argument is migrate
-	if len(os.Args) > 1 && os.Args[1] == "migrate" {
-		err := RunMigration(db)
-		if err != nil {
-			panic(fmt.Errorf("Error run migration: %w \n", err))
-		}
-		return
+	// if len(os.Args) > 1 && os.Args[1] == "migrate" {
+	// 	err := RunMigration(db)
+	// 	if err != nil {
+	// 		panic(fmt.Errorf("Error run migration: %w \n", err))
+	// 	}
+	// 	return
+	// }
+
+	err = RunMigration(db)
+	if err != nil {
+		panic(fmt.Errorf("Error run migration: %w", err))
 	}
 
 	transaction := db.Begin()
@@ -93,6 +102,36 @@ func setupHTTPMongoProduct(db *mongo.Database) *fiber.App {
 }
 
 func RunMigration(db *gorm.DB) error {
+	dbSql, err := db.DB()
+	if err != nil {
+		return err
+	}
+
+	location, err := iofs.New(fs, "migrations")
+	if err != nil {
+		return err
+	}
+
+	driver, err := mysql.WithInstance(dbSql, &mysql.Config{})
+	if err != nil {
+		return err
+	}
+
+	migration, err := migrate.NewWithInstance("iofs", location, "mysql", driver)
+	if err != nil {
+		return err
+	}
+
+	err = migration.Up()
+	if err != nil {
+		// return err
+		if errors.Is(err, migrate.ErrNoChange) {
+			return nil
+		} else {
+			return err
+		}
+	}
+
 	return nil
 }
 
