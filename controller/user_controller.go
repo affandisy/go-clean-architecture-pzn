@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -24,6 +25,14 @@ func NewUserController(db *gorm.DB, validate *validator.Validate, logger *logrus
 		Validate: validate,
 		Log:      logger,
 	}
+}
+
+func (c *UserController) Routes(app *fiber.App) {
+	app.Post("/api/users", c.Register)
+	app.Post("/api/users/_login", c.Login)
+	app.Delete("/api/users")
+	app.Patch("/api/users/_current")
+	app.Get("/api/users/_current")
 }
 
 func (c *UserController) Register(ctx *fiber.Ctx) error {
@@ -48,6 +57,18 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 
 	tx := c.DB.Begin()
 	defer tx.Rollback()
+
+	var total int64
+	err = tx.Model(&entity.User{}).Where("id = ?", request.ID).Count(&total).Error
+	if err != nil {
+		c.Log.Warnf("Failed create user to database: %+v", err)
+		return err
+	}
+
+	if total > 0 {
+		c.Log.Warnf("User already exists: %+v", err)
+		return fiber.ErrConflict
+	}
 
 	user := entity.User{
 		ID:       request.ID,
@@ -80,7 +101,8 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	tx := c.DB.Begin(&sql.TxOptions{ReadOnly: true})
+	// tx := c.DB.Begin(&sql.TxOptions{ReadOnly: true})
+	tx := c.DB.Begin()
 	defer tx.Rollback()
 
 	var user entity.User
@@ -95,6 +117,128 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 		c.Log.Warnf("Failed to compare user password with bcrypt hash: %+v", err)
 		return fiber.ErrUnauthorized
 	}
+
+	user.Token = uuid.New().String()
+	err = tx.Save(&user).Error
+	if err != nil {
+		c.Log.Warnf("Failed save user: %+v", err)
+		return err
+	}
+
+	tx.Commit()
+
+	response := model.UserResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		Token:     user.Token,
+	}
+
+	// response := model.UserResponse{
+	// 	ID:        user.ID,
+	// 	Name:      user.Name,
+	// 	CreatedAt: user.CreatedAt,
+	// 	UpdatedAt: user.UpdatedAt,
+	// }
+
+	return ctx.JSON(model.WebResponse[model.UserResponse]{Data: response})
+}
+
+func (c *UserController) Current(ctx *fiber.Ctx) error {
+	token := ctx.Get("Authorization", "NOT_FOUND")
+
+	tx := c.DB.Begin(&sql.TxOptions{ReadOnly: true})
+	defer tx.Rollback()
+
+	var user entity.User
+	err := tx.Take(&user, "token = ?", token).Error
+	if err != nil {
+		c.Log.Warnf("Failed find user by token: %+v", err)
+		return err
+	}
+
+	response := model.UserResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	return ctx.JSON(model.WebResponse[model.UserResponse]{Data: response})
+}
+
+func (c *UserController) Logout(ctx *fiber.Ctx) error {
+	token := ctx.Get("Authorization", "NOT_FOUND")
+
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	var user entity.User
+	err := tx.Take(&user, "token = ?", token).Error
+	if err != nil {
+		c.Log.Warnf("Failed find user by token: %+v", err)
+		return err
+	}
+
+	user.Token = ""
+	err = tx.Save(&user).Error
+	if err != nil {
+		c.Log.Warnf("Failed save user: %+v", err)
+		return err
+	}
+
+	tx.Commit()
+
+	return ctx.JSON(model.WebResponse[bool]{Data: true})
+}
+
+func (c *UserController) Update(ctx *fiber.Ctx) error {
+	token := ctx.Get("Authorization", "NOT_FOUND")
+
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	var user entity.User
+	err := tx.Take(&user, "token = ?", token).Error
+	if err != nil {
+		c.Log.Warnf("Failed find user by token: %+v", err)
+		return err
+	}
+
+	var request model.UpdateUserRequest
+	err = ctx.BodyParser(&request)
+	if err != nil {
+		c.Log.Warnf("Failed to parse request body: %+v", err)
+		return err
+	}
+
+	err = c.Validate.Struct(request)
+	if err != nil {
+		c.Log.Warnf("Invalid request body: %+v", err)
+		return err
+	}
+
+	if request.Name != "" {
+		user.Name = request.Name
+	}
+
+	if request.Password != "" {
+		password, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.Log.Warnf("Failed to generate bcrypt hash: %+v", err)
+			return err
+		}
+		user.Password = string(password)
+	}
+
+	err = tx.Save(&user).Error
+	if err != nil {
+		c.Log.Warnf("Failed save user: %+v", err)
+		return err
+	}
+
+	tx.Commit()
 
 	response := model.UserResponse{
 		ID:        user.ID,
