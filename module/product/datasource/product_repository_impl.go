@@ -2,7 +2,7 @@ package datasource
 
 import (
 	configMongo "go-clean-architecture-pzn/app"
-	"go-clean-architecture-pzn/domain/entity"
+	"go-clean-architecture-pzn/entity"
 	"go-clean-architecture-pzn/exception"
 	"go-clean-architecture-pzn/module/product"
 

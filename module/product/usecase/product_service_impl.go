@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"go-clean-architecture-pzn/domain/entity"
+	"go-clean-architecture-pzn/entity"
 	"go-clean-architecture-pzn/model"
 	productRepo "go-clean-architecture-pzn/module/product"
 

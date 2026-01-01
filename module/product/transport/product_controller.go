@@ -30,7 +30,7 @@ func (controller *ProductController) Create(c *fiber.Ctx) error {
 	exception.PanicIfNeeded(err)
 
 	response := controller.ProductService.Create(request)
-	return c.JSON(model.WebResponse{
+	return c.JSON(model.WebResponseHTTP{
 		Code:   200,
 		Status: "OK",
 		Data:   response,
@@ -40,7 +40,7 @@ func (controller *ProductController) Create(c *fiber.Ctx) error {
 func (controller *ProductController) List(c *fiber.Ctx) error {
 	responses := controller.ProductService.List()
 
-	return c.JSON(model.WebResponse{
+	return c.JSON(model.WebResponseHTTP{
 		Code:   200,
 		Status: "OK",
 		Data:   responses,

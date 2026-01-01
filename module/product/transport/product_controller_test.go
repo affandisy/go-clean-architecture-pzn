@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"go-clean-architecture-pzn/domain/entity"
+	"go-clean-architecture-pzn/entity"
 	"go-clean-architecture-pzn/model"
 	"io"
 	"net/http/httptest"
@@ -31,7 +31,7 @@ func TestProductController_Create(t *testing.T) {
 	assert.Equal(t, 200, response.StatusCode)
 	responseBody, _ := io.ReadAll(response.Body)
 
-	webResponse := model.WebResponse{}
+	webResponse := model.WebResponseHTTP{}
 	json.Unmarshal(responseBody, &webResponse)
 	assert.Equal(t, 200, webResponse.Code)
 	assert.Equal(t, "OK", webResponse.Status)
@@ -64,7 +64,7 @@ func TestProductController_List(t *testing.T) {
 	assert.Equal(t, 200, response.StatusCode)
 	responseBody, _ := io.ReadAll(response.Body)
 
-	webResponse := model.WebResponse{}
+	webResponse := model.WebResponseHTTP{}
 	json.Unmarshal(responseBody, &webResponse)
 	assert.Equal(t, 200, webResponse.Code)
 	assert.Equal(t, "OK", webResponse.Status)

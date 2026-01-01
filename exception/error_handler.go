@@ -9,14 +9,14 @@ import (
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	_, ok := err.(ValidationError)
 	if ok {
-		ctx.JSON(model.WebResponse{
+		ctx.JSON(model.WebResponseHTTP{
 			Code:   400,
 			Status: "BAD_REQUEST",
 			Data:   err.Error(),
 		})
 	}
 
-	return ctx.JSON(model.WebResponse{
+	return ctx.JSON(model.WebResponseHTTP{
 		Code:   500,
 		Status: "INTERNAL_SERVER_ERROR",
 		Data:   err.Error(),
