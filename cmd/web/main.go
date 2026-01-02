@@ -5,6 +5,7 @@ import (
 	"go-clean-architecture-pzn/controller"
 	"go-clean-architecture-pzn/internal"
 	"go-clean-architecture-pzn/middleware"
+	"go-clean-architecture-pzn/usecase"
 )
 
 func main() {
@@ -30,8 +31,9 @@ func main() {
 	app := internal.NewFiber(config)
 
 	routeConfig := internal.RouteConfig{
-		App:               app,
-		UserController:    controller.NewUserController(db, validate, log),
+		App: app,
+		// UserController:    controller.NewUserController(db, validate, log),
+		UserController:    controller.NewUserController(usecase.NewUserUseCase(db, log, validate), log),
 		ContactController: controller.NewContactController(db, validate, log),
 		AddressController: controller.NewAddressController(db, validate, log),
 		AuthMiddleware:    middleware.NewAuth(db, log),
