@@ -207,6 +207,8 @@ func (c *ContactController) Update(ctx *fiber.Ctx) error {
 	}
 
 	request.UserId = user.ID
+	request.ID = ctx.Params("contactId")
+
 	if err := c.Validate.Struct(request); err != nil {
 		c.Log.WithError(err).Error("error validating request body")
 		return fiber.ErrBadRequest
@@ -216,7 +218,8 @@ func (c *ContactController) Update(ctx *fiber.Ctx) error {
 	defer tx.Rollback()
 
 	contact := new(entity.Contact)
-	if err := tx.Where("id = ? AND user_id = ?", ctx.Params("contactId"), user.ID).Take(contact).Error; err != nil {
+	// if err := tx.Where("id = ? AND user_id = ?", ctx.Params("contactId"), user.ID).Take(contact).Error; err != nil {
+	if err := tx.Where("id = ? AND user_id = ?", request.ID, user.ID).Take(contact).Error; err != nil {
 		c.Log.WithError(err).Error("error getting contact")
 		return fiber.ErrNotFound
 	}
