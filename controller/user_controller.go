@@ -27,13 +27,13 @@ func NewUserController(db *gorm.DB, validate *validator.Validate, logger *logrus
 	}
 }
 
-func (c *UserController) Routes(app *fiber.App) {
-	app.Post("/api/users", c.Register)
-	app.Post("/api/users/_login", c.Login)
-	app.Delete("/api/users")
-	app.Patch("/api/users/_current")
-	app.Get("/api/users/_current")
-}
+// func (c *UserController) Routes(app *fiber.App) {
+// 	app.Post("/api/users", c.Register)
+// 	app.Post("/api/users/_login", c.Login)
+// 	app.Delete("/api/users")
+// 	app.Patch("/api/users/_current")
+// 	app.Get("/api/users/_current")
+// }
 
 func (c *UserController) Register(ctx *fiber.Ctx) error {
 	// var request model.RegisterUserRequest
