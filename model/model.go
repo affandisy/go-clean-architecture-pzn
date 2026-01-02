@@ -5,6 +5,7 @@ type WebResponse[T any] struct {
 	// PagingResponse *PagingResponse `json:"paging,omitempty"`
 	Data   T            `json:"data"`
 	Paging PageMetadata `json:"paging,omitempty"`
+	Errors string       `json:"errors,omitempty"`
 }
 
 type PageResponse[T any] struct {

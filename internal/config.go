@@ -1,4 +1,4 @@
-package config
+package internal
 
 import "github.com/spf13/viper"
 
@@ -8,7 +8,9 @@ func New() (*viper.Viper, error) {
 
 	config.SetConfigName("config")
 	config.SetConfigType("json")
-	config.AddConfigPath(".")
+	// config.AddConfigPath(".")
+	config.AddConfigPath("./../")
+	config.AddConfigPath("./")
 	err := config.ReadInConfig()
 
 	if err != nil {

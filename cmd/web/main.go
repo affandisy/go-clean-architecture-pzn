@@ -2,17 +2,14 @@ package main
 
 import (
 	"fmt"
-	"go-clean-architecture-pzn/config"
 	"go-clean-architecture-pzn/controller"
 	"go-clean-architecture-pzn/internal"
 	"go-clean-architecture-pzn/middleware"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/viper"
+	"go-clean-architecture-pzn/route"
 )
 
 func main() {
-	viperConfig, err := config.New()
+	viperConfig, err := internal.New()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error viperConfig file: %w", err))
 	}
@@ -25,10 +22,22 @@ func main() {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}
 
-	validator := internal.NewValidator(viperConfig)
+	// validator := internal.NewValidator(viperConfig)
+	validate := internal.NewValidator(viperConfig)
 
 	webPort := viperConfig.GetInt("web.port")
-	app := NewFiber(viperConfig)
+
+	app := internal.NewFiber(viperConfig)
+
+	routeConfig := route.RouteConfig{
+		App:               app,
+		UserController:    controller.NewUserController(db, validate, log),
+		ContactController: controller.NewContactController(db, validate, log),
+		AddressController: controller.NewAddressController(db, validate, log),
+		AuthMiddleware:    middleware.NewAuth(db, log),
+	}
+
+	routeConfig.Setup()
 
 	// regis route
 	// err = route.User(app)
@@ -47,34 +56,34 @@ func main() {
 	// }
 
 	// register controller
-	userController := controller.NewUserController(db, validator, log)
+	// userController := controller.NewUserController(db, validator, log)
 	// userController.Routes(app)
-	contactController := controller.NewContactController(db, validator, log)
+	// contactController := controller.NewContactController(db, validator, log)
 	// contactController.Routes(app)
-	addressController := controller.NewAddressController(db, validator, log)
+	// addressController := controller.NewAddressController(db, validator, log)
 	// addressController.Routes(app)
 
 	// guest routes
-	app.Post("/api/users", userController.Register)
-	app.Post("/api/users/_login", userController.Login)
+	// app.Post("/api/users", userController.Register)
+	// app.Post("/api/users/_login", userController.Login)
 
-	// auth routes
-	app.Use(middleware.NewAuth(db, log))
-	app.Delete("/api/users", userController.Logout)
-	app.Patch("/api/users/_current", userController.Update)
-	app.Get("/api/users/_current", userController.Current)
+	// // auth routes
+	// app.Use(middleware.NewAuth(db, log))
+	// app.Delete("/api/users", userController.Logout)
+	// app.Patch("/api/users/_current", userController.Update)
+	// app.Get("/api/users/_current", userController.Current)
 
-	app.Get("/api/contacts", contactController.List)
-	app.Post("/api/contacts", contactController.Create)
-	app.Put("/api/contacts", contactController.Update)
-	app.Get("/api/contacts/:contactId", contactController.Get)
-	app.Delete("/api/contacts", contactController.Delete)
+	// app.Get("/api/contacts", contactController.List)
+	// app.Post("/api/contacts", contactController.Create)
+	// app.Put("/api/contacts", contactController.Update)
+	// app.Get("/api/contacts/:contactId", contactController.Get)
+	// app.Delete("/api/contacts", contactController.Delete)
 
-	app.Get("/api/contacts/:contactId/addresses", addressController.List)
-	app.Post("/api/contacts/:contactId/addresses", addressController.Create)
-	app.Put("/api/contacts/:contactId/addresses/:addressId", addressController.Update)
-	app.Get("/api/contacts/:contactId/addresses/:addressId", addressController.Get)
-	app.Delete("/api/contacts/:contactId/addresses/:addressId", addressController.Delete)
+	// app.Get("/api/contacts/:contactId/addresses", addressController.List)
+	// app.Post("/api/contacts/:contactId/addresses", addressController.Create)
+	// app.Put("/api/contacts/:contactId/addresses/:addressId", addressController.Update)
+	// app.Get("/api/contacts/:contactId/addresses/:addressId", addressController.Get)
+	// app.Delete("/api/contacts/:contactId/addresses/:addressId", addressController.Delete)
 
 	// Start server
 	err = app.Listen(fmt.Sprintf(":%d", webPort))
@@ -84,26 +93,26 @@ func main() {
 	}
 }
 
-func NewFiber(config *viper.Viper) *fiber.App {
-	var app = fiber.New(fiber.Config{
-		// AppName:      config.Get("app.name").(string),
-		AppName:      config.GetString("app.name"),
-		ErrorHandler: NewErrorHandler(),
-		Prefork:      config.GetBool("web.prefork"),
-	})
+// func NewFiber(config *viper.Viper) *fiber.App {
+// 	var app = fiber.New(fiber.Config{
+// 		// AppName:      config.Get("app.name").(string),
+// 		AppName:      config.GetString("app.name"),
+// 		ErrorHandler: NewErrorHandler(),
+// 		Prefork:      config.GetBool("web.prefork"),
+// 	})
 
-	return app
-}
+// 	return app
+// }
 
-func NewErrorHandler() fiber.ErrorHandler {
-	return func(ctx *fiber.Ctx, err error) error {
-		code := fiber.StatusInternalServerError
-		if e, ok := err.(*fiber.Error); ok {
-			code = e.Code
-		}
+// func NewErrorHandler() fiber.ErrorHandler {
+// 	return func(ctx *fiber.Ctx, err error) error {
+// 		code := fiber.StatusInternalServerError
+// 		if e, ok := err.(*fiber.Error); ok {
+// 			code = e.Code
+// 		}
 
-		return ctx.Status(code).JSON(fiber.Map{
-			"errors": err.Error(),
-		})
-	}
-}
+// 		return ctx.Status(code).JSON(fiber.Map{
+// 			"errors": err.Error(),
+// 		})
+// 	}
+// }

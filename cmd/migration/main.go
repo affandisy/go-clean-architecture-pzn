@@ -4,7 +4,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"go-clean-architecture-pzn/config"
 	"go-clean-architecture-pzn/internal"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -16,7 +15,7 @@ import (
 var fs embed.FS
 
 func main() {
-	viper, err := config.New()
+	viper, err := internal.New()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error viper file: %w", err))
 	}
