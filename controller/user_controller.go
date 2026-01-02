@@ -137,19 +137,12 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 	tx.Commit()
 
 	response := model.UserResponse{
-		ID:        user.ID,
-		Name:      user.Name,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Token:     user.Token,
+		// ID:        user.ID,
+		// Name:      user.Name,
+		// CreatedAt: user.CreatedAt,
+		// UpdatedAt: user.UpdatedAt,
+		Token: user.Token,
 	}
-
-	// response := model.UserResponse{
-	// 	ID:        user.ID,
-	// 	Name:      user.Name,
-	// 	CreatedAt: user.CreatedAt,
-	// 	UpdatedAt: user.UpdatedAt,
-	// }
 
 	return ctx.JSON(model.WebResponse[model.UserResponse]{Data: response})
 }
