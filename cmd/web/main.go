@@ -5,31 +5,31 @@ import (
 	"go-clean-architecture-pzn/controller"
 	"go-clean-architecture-pzn/internal"
 	"go-clean-architecture-pzn/middleware"
-	"go-clean-architecture-pzn/route"
 )
 
 func main() {
-	viperConfig, err := internal.New()
+	// viperConfig, err := internal.New()
+	config, err := internal.NewViper()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error viperConfig file: %w", err))
+		panic(fmt.Errorf("Fatal error config file: %w", err))
 	}
 
-	log := internal.NewLogger(viperConfig)
+	log := internal.NewLogger(config)
 	log.Info("Start application")
 
-	db, err := internal.NewDatabase(viperConfig, log)
+	db, err := internal.NewDatabase(config, log)
 	if err != nil {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}
 
 	// validator := internal.NewValidator(viperConfig)
-	validate := internal.NewValidator(viperConfig)
+	validate := internal.NewValidator(config)
 
-	webPort := viperConfig.GetInt("web.port")
+	webPort := config.GetInt("web.port")
 
-	app := internal.NewFiber(viperConfig)
+	app := internal.NewFiber(config)
 
-	routeConfig := route.RouteConfig{
+	routeConfig := internal.RouteConfig{
 		App:               app,
 		UserController:    controller.NewUserController(db, validate, log),
 		ContactController: controller.NewContactController(db, validate, log),

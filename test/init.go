@@ -5,7 +5,6 @@ import (
 	"go-clean-architecture-pzn/controller"
 	"go-clean-architecture-pzn/internal"
 	"go-clean-architecture-pzn/middleware"
-	"go-clean-architecture-pzn/route"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -27,7 +26,7 @@ var validate *validator.Validate
 func init() {
 	var err error
 
-	viperConfig, err = internal.New()
+	viperConfig, err = internal.NewViper()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error viperConfig file: %w", err))
 	}
@@ -41,7 +40,7 @@ func init() {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}
 
-	routeConfig := route.RouteConfig{
+	routeConfig := internal.RouteConfig{
 		App:               app,
 		UserController:    controller.NewUserController(db, validate, log),
 		ContactController: controller.NewContactController(db, validate, log),

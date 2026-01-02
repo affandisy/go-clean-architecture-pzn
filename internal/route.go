@@ -1,4 +1,4 @@
-package route
+package internal
 
 import (
 	"go-clean-architecture-pzn/controller"

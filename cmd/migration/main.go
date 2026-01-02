@@ -15,7 +15,7 @@ import (
 var fs embed.FS
 
 func main() {
-	viper, err := internal.New()
+	viper, err := internal.NewViper()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error viper file: %w", err))
 	}
