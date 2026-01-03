@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"database/sql"
-	"go-clean-architecture-pzn/entity"
-	"go-clean-architecture-pzn/model"
+	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/model"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

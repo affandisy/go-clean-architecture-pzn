@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"go-clean-architecture-pzn/entity"
+	"go-clean-architecture-pzn/internal/entity"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"

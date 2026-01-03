@@ -2,8 +2,8 @@ package test
 
 import (
 	"encoding/json"
-	"go-clean-architecture-pzn/entity"
-	"go-clean-architecture-pzn/model"
+	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/model"
 	"io"
 	"net/http"
 	"net/http/httptest"

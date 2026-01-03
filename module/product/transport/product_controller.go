@@ -2,7 +2,7 @@ package controller
 
 import (
 	"go-clean-architecture-pzn/exception"
-	"go-clean-architecture-pzn/model"
+	"go-clean-architecture-pzn/internal/model"
 	productSvc "go-clean-architecture-pzn/module/product/usecase"
 
 	"github.com/gofiber/fiber/v2"

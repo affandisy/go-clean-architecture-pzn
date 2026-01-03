@@ -2,8 +2,8 @@ package datasource
 
 import (
 	configMongo "go-clean-architecture-pzn/app"
-	"go-clean-architecture-pzn/entity"
 	"go-clean-architecture-pzn/exception"
+	"go-clean-architecture-pzn/internal/entity"
 	"go-clean-architecture-pzn/module/product"
 
 	"go.mongodb.org/mongo-driver/bson"

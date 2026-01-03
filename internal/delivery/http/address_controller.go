@@ -1,10 +1,10 @@
-package controller
+package http
 
 import (
-	"go-clean-architecture-pzn/entity"
-	"go-clean-architecture-pzn/middleware"
-	"go-clean-architecture-pzn/model"
-	"go-clean-architecture-pzn/usecase"
+	"go-clean-architecture-pzn/internal/delivery/http/middleware"
+	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/model"
+	"go-clean-architecture-pzn/internal/usecase"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"

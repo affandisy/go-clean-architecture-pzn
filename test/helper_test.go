@@ -1,7 +1,7 @@
 package test
 
 import (
-	"go-clean-architecture-pzn/entity"
+	"go-clean-architecture-pzn/internal/entity"
 	"strconv"
 	"testing"
 

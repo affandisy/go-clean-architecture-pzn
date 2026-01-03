@@ -2,10 +2,10 @@ package test
 
 import (
 	"fmt"
-	"go-clean-architecture-pzn/controller"
 	"go-clean-architecture-pzn/internal"
-	"go-clean-architecture-pzn/middleware"
-	"go-clean-architecture-pzn/usecase"
+	http "go-clean-architecture-pzn/internal/delivery/http"
+	"go-clean-architecture-pzn/internal/delivery/http/middleware"
+	"go-clean-architecture-pzn/internal/usecase"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -44,11 +44,11 @@ func init() {
 	routeConfig := internal.RouteConfig{
 		App: app,
 		// UserController:    controller.NewUserController(db, validate, log),
-		UserController: controller.NewUserController(usecase.NewUserUseCase(db, log, validate), log),
+		UserController: http.NewUserController(usecase.NewUserUseCase(db, log, validate), log),
 		// ContactController: controller.NewContactController(db, validate, log),
-		ContactController: controller.NewContactController(usecase.NewContactUseCase(db, log, validate), log),
+		ContactController: http.NewContactController(usecase.NewContactUseCase(db, log, validate), log),
 		// AddressController: controller.NewAddressController(db, validate, log),
-		AddressController: controller.NewAddressController(usecase.NewAddressUseCase(db, log, validate), log),
+		AddressController: http.NewAddressController(usecase.NewAddressUseCase(db, log, validate), log),
 		AuthMiddleware:    middleware.NewAuth(db, log),
 	}
 

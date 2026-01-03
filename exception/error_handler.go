@@ -1,7 +1,7 @@
 package exception
 
 import (
-	"go-clean-architecture-pzn/model"
+	"go-clean-architecture-pzn/internal/model"
 
 	"github.com/gofiber/fiber/v2"
 )

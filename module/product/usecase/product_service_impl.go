@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"go-clean-architecture-pzn/entity"
-	"go-clean-architecture-pzn/model"
+	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/model"
 	productRepo "go-clean-architecture-pzn/module/product"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"

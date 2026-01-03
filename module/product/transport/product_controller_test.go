@@ -3,8 +3,8 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"go-clean-architecture-pzn/entity"
-	"go-clean-architecture-pzn/model"
+	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/model"
 	"io"
 	"net/http/httptest"
 	"testing"

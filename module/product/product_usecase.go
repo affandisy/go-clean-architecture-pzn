@@ -1,6 +1,6 @@
 package product
 
-import "go-clean-architecture-pzn/model"
+import "go-clean-architecture-pzn/internal/model"
 
 type ProductUseCase interface {
 	Create(request model.CreateProductRequest) (response model.CreateProductResponse)
