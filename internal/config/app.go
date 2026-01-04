@@ -25,11 +25,13 @@ type BootstrapConfig struct {
 func Bootstrap(config *BootstrapConfig) {
 	// setup repo
 	userRepository := repository.NewUserRepository(config.Log)
+	contactRepository := repository.NewContactRepository(config.Log)
+	addressRepository := repository.NewAddressRepository(config.Log)
 
 	// setup use case
 	userUseCase := usecase.NewUserUseCase(config.DB, config.Log, config.Validate, userRepository)
-	contactUseCase := usecase.NewContactUseCase(config.DB, config.Log, config.Validate)
-	addressUseCase := usecase.NewAddressUseCase(config.DB, config.Log, config.Validate)
+	contactUseCase := usecase.NewContactUseCase(config.DB, config.Log, config.Validate, contactRepository)
+	addressUseCase := usecase.NewAddressUseCase(config.DB, config.Log, config.Validate, addressRepository, contactRepository)
 
 	// setup controller
 	userController := http.NewUserController(userUseCase, config.Log)
