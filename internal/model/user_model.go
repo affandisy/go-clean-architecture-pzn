@@ -9,6 +9,10 @@ type UserResponse struct {
 	UpdatedAt int64  `json:"updated_at,omitempty"`
 }
 
+type VerifyUserRequest struct {
+	Token string `validate:"required,max=100"`
+}
+
 type RegisterUserRequest struct {
 	// Username string `json:"username" validate:"required,max=100"`
 	ID       string `json:"id" validate:"required,max=100"`

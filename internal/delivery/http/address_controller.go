@@ -2,7 +2,6 @@ package http
 
 import (
 	"go-clean-architecture-pzn/internal/delivery/http/middleware"
-	"go-clean-architecture-pzn/internal/entity"
 	"go-clean-architecture-pzn/internal/model"
 	"go-clean-architecture-pzn/internal/usecase"
 
@@ -23,7 +22,8 @@ func NewAddressController(usecase *usecase.AddressUseCase, logger *logrus.Logger
 }
 
 func (c *AddressController) Create(ctx *fiber.Ctx) error {
-	user := ctx.Locals("user").(*entity.User)
+	// user := ctx.Locals("user").(*entity.User)
+	auth := middleware.GetUser(ctx)
 
 	request := new(model.CreateAddressRequest)
 	if err := ctx.BodyParser(request); err != nil {
@@ -31,7 +31,7 @@ func (c *AddressController) Create(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	request.UserId = user.ID
+	request.UserId = auth.ID
 	request.ContactId = ctx.Params("contactId")
 
 	response, err := c.UseCase.Create(ctx.UserContext(), request)
@@ -44,12 +44,12 @@ func (c *AddressController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c *AddressController) List(ctx *fiber.Ctx) error {
-	user := middleware.GetUser(ctx)
+	auth := middleware.GetUser(ctx)
 	contactId := ctx.Params("contactId")
 
 	// responses, err := c.UseCase.List(ctx.UserContext(), user, contactId)
 	request := &model.ListAddressRequest{
-		UserId:    user.ID,
+		UserId:    auth.ID,
 		ContactId: contactId,
 	}
 
@@ -63,13 +63,13 @@ func (c *AddressController) List(ctx *fiber.Ctx) error {
 }
 
 func (c *AddressController) Get(ctx *fiber.Ctx) error {
-	user := middleware.GetUser(ctx)
+	auth := middleware.GetUser(ctx)
 	contactId := ctx.Params("contactId")
 	addressId := ctx.Params("addressId")
 
 	// response, err := c.UseCase.Get(ctx.UserContext(), user, contactId, addressId)
 	request := &model.GetAddressRequest{
-		UserId:    user.ID,
+		UserId:    auth.ID,
 		ContactId: contactId,
 		ID:        addressId,
 	}
@@ -84,7 +84,7 @@ func (c *AddressController) Get(ctx *fiber.Ctx) error {
 }
 
 func (c *AddressController) Update(ctx *fiber.Ctx) error {
-	user := middleware.GetUser(ctx)
+	auth := middleware.GetUser(ctx)
 
 	request := new(model.UpdateAddressRequest)
 	if err := ctx.BodyParser(request); err != nil {
@@ -92,7 +92,7 @@ func (c *AddressController) Update(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	request.UserId = user.ID
+	request.UserId = auth.ID
 	request.ContactId = ctx.Params("contactId")
 	request.ID = ctx.Params("addressId")
 
@@ -106,13 +106,13 @@ func (c *AddressController) Update(ctx *fiber.Ctx) error {
 }
 
 func (c *AddressController) Delete(ctx *fiber.Ctx) error {
-	user := middleware.GetUser(ctx)
+	auth := middleware.GetUser(ctx)
 	contactId := ctx.Params("contactId")
 	addressId := ctx.Params("addressId")
 
 	// if err := c.UseCase.Delete(ctx.UserContext(), user, contactId, addressId); err != nil {
 	request := &model.DeleteAddressRequest{
-		UserId:    user.ID,
+		UserId:    auth.ID,
 		ContactId: contactId,
 		ID:        addressId,
 	}

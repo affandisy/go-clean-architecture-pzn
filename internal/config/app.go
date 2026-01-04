@@ -47,7 +47,8 @@ func Bootstrap(config *BootstrapConfig) {
 	addressController := http.NewAddressController(addressUseCase, config.Log)
 
 	// setup middleware
-	authMiddleware := middleware.NewAuth(config.DB, config.Log)
+	// authMiddleware := middleware.NewAuth(config.DB, config.Log)
+	authMiddleware := middleware.NewAuth(userUseCase)
 
 	routeConfig := router.RouteConfig{
 		App:               config.App,

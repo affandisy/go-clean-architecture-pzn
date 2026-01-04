@@ -1,7 +1,7 @@
 package http
 
 import (
-	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/delivery/http/middleware"
 	"go-clean-architecture-pzn/internal/model"
 	"go-clean-architecture-pzn/internal/usecase"
 
@@ -57,11 +57,12 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 
 func (c *UserController) Current(ctx *fiber.Ctx) error {
 
-	user := ctx.Locals("user").(*entity.User)
+	// user := ctx.Locals("user").(*entity.User)
+	auth := middleware.GetUser(ctx)
 
 	// response, err := c.UseCase.Current(user)
 	request := &model.GetUserRequest{
-		ID: user.ID,
+		ID: auth.ID,
 	}
 
 	response, err := c.UseCase.Current(ctx.UserContext(), request)
@@ -75,12 +76,13 @@ func (c *UserController) Current(ctx *fiber.Ctx) error {
 
 func (c *UserController) Logout(ctx *fiber.Ctx) error {
 
-	user := ctx.Locals("user").(*entity.User)
+	// user := ctx.Locals("user").(*entity.User)
+	auth := middleware.GetUser(ctx)
 
 	// response, err := c.UseCase.Logout(user)
 
 	request := &model.LogoutUserRequest{
-		ID: user.ID,
+		ID: auth.ID,
 	}
 
 	response, err := c.UseCase.Logout(ctx.UserContext(), request)
@@ -93,7 +95,9 @@ func (c *UserController) Logout(ctx *fiber.Ctx) error {
 }
 
 func (c *UserController) Update(ctx *fiber.Ctx) error {
-	user := ctx.Locals("user").(*entity.User)
+	// user := ctx.Locals("user").(*entity.User)
+
+	auth := middleware.GetUser(ctx)
 
 	request := new(model.UpdateUserRequest)
 	if err := ctx.BodyParser(request); err != nil {
@@ -101,7 +105,7 @@ func (c *UserController) Update(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	request.ID = user.ID
+	request.ID = auth.ID
 
 	response, err := c.UseCase.Update(ctx.UserContext(), request)
 	if err != nil {
