@@ -15,20 +15,20 @@ import (
 var fs embed.FS
 
 func main() {
-	viper, err := config.NewViper()
-	if err != nil {
-		panic(fmt.Errorf("Fatal error viper file: %w", err))
-	}
+	viper := config.NewViper()
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error viper file: %w", err))
+	// }
 
 	log := config.NewLogger(viper)
 	log.Info("Start migration")
 
-	db, err := config.NewDatabase(viper, log)
-	if err != nil {
-		panic(fmt.Errorf("Fatal error database: %w", err))
-	}
+	db := config.NewDatabase(viper, log)
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error database: %w", err))
+	// }
 
-	err = RunMigration(db)
+	err := RunMigration(db)
 	if err != nil {
 		panic(fmt.Errorf("Error run migration: %w", err))
 	}

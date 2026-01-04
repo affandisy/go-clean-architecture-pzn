@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	config "go-clean-architecture-pzn/internal/config"
 
 	"github.com/go-playground/validator/v10"
@@ -22,22 +21,24 @@ var log *logrus.Logger
 var validate *validator.Validate
 
 func init() {
-	var err error
+	// var err error
 
-	viperConfig, err = config.NewViper()
-	if err != nil {
-		panic(fmt.Errorf("Fatal error viperConfig file: %w", err))
-	}
+	// viperConfig, err = config.NewViper()
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error viperConfig file: %w", err))
+	// }
 
+	viperConfig = config.NewViper()
 	log = config.NewLogger(viperConfig)
 	validate = config.NewValidator(viperConfig)
 	app = config.NewFiber(viperConfig)
 
-	db, err = config.NewDatabase(viperConfig, log)
-	if err != nil {
-		panic(fmt.Errorf("Fatal error database: %w", err))
-	}
+	// db, err = config.NewDatabase(viperConfig, log)
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error database: %w", err))
+	// }
 
+	db = config.NewDatabase(viperConfig, log)
 	// routeConfig := route.RouteConfig{
 	// 	App: app,
 	// 	// UserController:    controller.NewUserController(db, validate, log),

@@ -8,25 +8,33 @@ import (
 
 func main() {
 	// viperConfig, err := internal.New()
-	viperConfig, err := config.NewViper()
-	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %w", err))
-	}
+	// viperConfig, err := config.NewViper()
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error config file: %w", err))
+	// }
+
+	viperConfig := config.NewViper()
 
 	log := config.NewLogger(viperConfig)
-	log.Info("Start application")
+	// log.Info("Start application")
 
-	db, err := config.NewDatabase(viperConfig, log)
-	if err != nil {
-		panic(fmt.Errorf("Fatal error database: %w", err))
-	}
+	// db, err := config.NewDatabase(viperConfig, log)
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error database: %w", err))
+	// }
+	db := config.NewDatabase(viperConfig, log)
 
 	// validator := internal.NewValidator(viperConfig)
 	validate := config.NewValidator(viperConfig)
 
-	webPort := viperConfig.GetInt("web.port")
+	// webPort := viperConfig.GetInt("web.port")
 
 	app := config.NewFiber(viperConfig)
+
+	// producer, err := config.NewKafkaProducer(viperConfig)
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error kafka producer: %w", err))
+	// }
 
 	config.Bootstrap(&config.BootstrapConfig{
 		DB:       db,
@@ -34,6 +42,7 @@ func main() {
 		Log:      log,
 		Validate: validate,
 		Config:   viperConfig,
+		// Producer: producer,
 	})
 
 	// routeConfig := route.RouteConfig{
@@ -96,10 +105,14 @@ func main() {
 	// app.Delete("/api/contacts/:contactId/addresses/:addressId", addressController.Delete)
 
 	// Start server
-	err = app.Listen(fmt.Sprintf(":%d", webPort))
+	// webPort := viperConfig.GetInt("web.port")
+	// err := app.Listen(fmt.Sprintf(":%d", webPort))
+	webPort := viperConfig.GetInt("web.port")
+	err := app.Listen(fmt.Sprintf(":%d", webPort))
 	if err != nil {
 		// panic(err)
-		log.Fatal(err)
+		// log.Fatal(err)
+		log.Fatalf("Failed to start server: %v", err)
 	}
 }
 

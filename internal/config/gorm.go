@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func NewDatabase(viper *viper.Viper, log *logrus.Logger) (*gorm.DB, error) {
+func NewDatabase(viper *viper.Viper, log *logrus.Logger) *gorm.DB {
 	// username := viper.Get("database.username").(string)
 	// password := viper.Get("database.password").(string)
 	// host := viper.Get("database.host").(string)
@@ -37,19 +37,22 @@ func NewDatabase(viper *viper.Viper, log *logrus.Logger) (*gorm.DB, error) {
 		}),
 	})
 	if err != nil {
-		return nil, err
+		// return nil, err
+		log.Fatalf("Failed to connect database: %v", err)
 	}
 
 	connection, err := db.DB()
 	if err != nil {
-		return nil, err
+		// return nil, err
+		log.Fatalf("Failed to connect database: %v", err)
 	}
 
 	connection.SetMaxIdleConns(idleConnection)
 	connection.SetMaxOpenConns(maxConnection)
 	connection.SetConnMaxLifetime(time.Second * time.Duration(maxLifeTimeConnection))
 
-	return db, nil
+	// return db, nil
+	return db
 }
 
 type logrusWriter struct {
