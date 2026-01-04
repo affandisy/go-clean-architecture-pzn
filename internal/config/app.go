@@ -4,6 +4,7 @@ import (
 	"go-clean-architecture-pzn/internal/delivery/http"
 	"go-clean-architecture-pzn/internal/delivery/http/middleware"
 	router "go-clean-architecture-pzn/internal/delivery/http/route"
+	"go-clean-architecture-pzn/internal/gateway/messaging"
 	"go-clean-architecture-pzn/internal/repository"
 	"go-clean-architecture-pzn/internal/usecase"
 
@@ -30,10 +31,15 @@ func Bootstrap(config *BootstrapConfig) {
 	contactRepository := repository.NewContactRepository(config.Log)
 	addressRepository := repository.NewAddressRepository(config.Log)
 
+	// setup producer
+	userProducer := messaging.NewUserProducer(config.Producer, config.Log)
+	contactProducer := messaging.NewContactProducer(config.Producer, config.Log)
+	addressProducer := messaging.NewAddressProducer(config.Producer, config.Log)
+
 	// setup use case
-	userUseCase := usecase.NewUserUseCase(config.DB, config.Log, config.Validate, userRepository)
-	contactUseCase := usecase.NewContactUseCase(config.DB, config.Log, config.Validate, contactRepository)
-	addressUseCase := usecase.NewAddressUseCase(config.DB, config.Log, config.Validate, addressRepository, contactRepository)
+	userUseCase := usecase.NewUserUseCase(config.DB, config.Log, config.Validate, userRepository, userProducer)
+	contactUseCase := usecase.NewContactUseCase(config.DB, config.Log, config.Validate, contactRepository, contactProducer)
+	addressUseCase := usecase.NewAddressUseCase(config.DB, config.Log, config.Validate, addressRepository, contactRepository, addressProducer)
 
 	// setup controller
 	userController := http.NewUserController(userUseCase, config.Log)

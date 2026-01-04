@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/gateway/messaging"
 	"go-clean-architecture-pzn/internal/model"
 	"go-clean-architecture-pzn/internal/repository"
 
@@ -19,15 +20,17 @@ type AddressUseCase struct {
 	Validate          *validator.Validate
 	AddressRepository *repository.AddressRepository
 	ContactRepository *repository.ContactRepository
+	AddressProducer   *messaging.AddressProducer
 }
 
-func NewAddressUseCase(db *gorm.DB, logger *logrus.Logger, validate *validator.Validate, addressRepository *repository.AddressRepository, contactRepository *repository.ContactRepository) *AddressUseCase {
+func NewAddressUseCase(db *gorm.DB, logger *logrus.Logger, validate *validator.Validate, addressRepository *repository.AddressRepository, contactRepository *repository.ContactRepository, addressProducer *messaging.AddressProducer) *AddressUseCase {
 	return &AddressUseCase{
 		DB:                db,
 		Log:               logger,
 		Validate:          validate,
 		AddressRepository: addressRepository,
 		ContactRepository: contactRepository,
+		AddressProducer:   addressProducer,
 	}
 }
 

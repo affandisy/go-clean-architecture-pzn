@@ -20,5 +20,9 @@
             "max": 100,
             "lifetime": 300
         }
+    },
+    "kafka": {
+        "brokers": ["localhost:9092"],
+        "topic": "golang-clean-architecture"
     }
 }

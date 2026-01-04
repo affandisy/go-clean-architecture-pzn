@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"go-clean-architecture-pzn/internal/entity"
+	"go-clean-architecture-pzn/internal/gateway/messaging"
 	"go-clean-architecture-pzn/internal/model"
 	"go-clean-architecture-pzn/internal/repository"
 
@@ -18,14 +19,16 @@ type ContactUseCase struct {
 	Log               *logrus.Logger
 	Validate          *validator.Validate
 	ContactRepository *repository.ContactRepository
+	ContactProducer   *messaging.ContactProducer
 }
 
-func NewContactUseCase(db *gorm.DB, logger *logrus.Logger, validate *validator.Validate, contactRepository *repository.ContactRepository) *ContactUseCase {
+func NewContactUseCase(db *gorm.DB, logger *logrus.Logger, validate *validator.Validate, contactRepository *repository.ContactRepository, contactProducer *messaging.ContactProducer) *ContactUseCase {
 	return &ContactUseCase{
 		DB:                db,
 		Log:               logger,
 		Validate:          validate,
 		ContactRepository: contactRepository,
+		ContactProducer:   contactProducer,
 	}
 }
 
