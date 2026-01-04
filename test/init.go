@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	config "go-clean-architecture-pzn/internal/config"
 
 	"github.com/go-playground/validator/v10"
@@ -39,6 +40,10 @@ func init() {
 	// }
 
 	db = config.NewDatabase(viperConfig, log)
+	producer, err := config.NewKafkaProducer(viperConfig, log)
+	if err != nil {
+		panic(fmt.Errorf("Fatal error producer kafka"))
+	}
 	// routeConfig := route.RouteConfig{
 	// 	App: app,
 	// 	// UserController:    controller.NewUserController(db, validate, log),
@@ -56,6 +61,7 @@ func init() {
 		Log:      log,
 		Validate: validate,
 		Config:   viperConfig,
+		Producer: producer,
 	})
 
 	// routeConfig.Setup()

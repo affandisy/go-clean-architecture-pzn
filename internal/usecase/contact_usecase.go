@@ -5,6 +5,7 @@ import (
 	"go-clean-architecture-pzn/internal/entity"
 	"go-clean-architecture-pzn/internal/gateway/messaging"
 	"go-clean-architecture-pzn/internal/model"
+	"go-clean-architecture-pzn/internal/model/converter"
 	"go-clean-architecture-pzn/internal/repository"
 
 	"github.com/go-playground/validator/v10"
@@ -61,17 +62,24 @@ func (c *ContactUseCase) Create(ctx context.Context, request *model.CreateContac
 		return nil, fiber.ErrInternalServerError
 	}
 
-	response := &model.ContactResponse{
-		ID:        contact.ID,
-		FirstName: contact.FirstName,
-		LastName:  contact.LastName,
-		Email:     contact.Email,
-		Phone:     contact.Phone,
-		CreatedAt: contact.CreatedAt,
-		UpdatedAt: contact.UpdatedAt,
+	// response := &model.ContactResponse{
+	// 	ID:        contact.ID,
+	// 	FirstName: contact.FirstName,
+	// 	LastName:  contact.LastName,
+	// 	Email:     contact.Email,
+	// 	Phone:     contact.Phone,
+	// 	CreatedAt: contact.CreatedAt,
+	// 	UpdatedAt: contact.UpdatedAt,
+	// }
+
+	event := converter.ContactToEvent(contact)
+	if err := c.ContactProducer.Send(ctx, event); err != nil {
+		c.Log.WithError(err).Error("error publishing contact")
+		return nil, fiber.ErrInternalServerError
 	}
 
-	return response, nil
+	// return response, nil
+	return converter.ContactToResponse(contact), nil
 }
 
 func (c *ContactUseCase) Update(ctx context.Context, request *model.UpdateContactRequest) (*model.ContactResponse, error) {
@@ -106,17 +114,24 @@ func (c *ContactUseCase) Update(ctx context.Context, request *model.UpdateContac
 		return nil, fiber.ErrInternalServerError
 	}
 
-	response := &model.ContactResponse{
-		ID:        contact.ID,
-		FirstName: contact.FirstName,
-		LastName:  contact.LastName,
-		Email:     contact.Email,
-		Phone:     contact.Phone,
-		CreatedAt: contact.CreatedAt,
-		UpdatedAt: contact.UpdatedAt,
+	// response := &model.ContactResponse{
+	// 	ID:        contact.ID,
+	// 	FirstName: contact.FirstName,
+	// 	LastName:  contact.LastName,
+	// 	Email:     contact.Email,
+	// 	Phone:     contact.Phone,
+	// 	CreatedAt: contact.CreatedAt,
+	// 	UpdatedAt: contact.UpdatedAt,
+	// }
+
+	event := converter.ContactToEvent(contact)
+	if err := c.ContactProducer.Send(ctx, event); err != nil {
+		c.Log.WithError(err).Error("error publishing contact")
+		return nil, fiber.ErrInternalServerError
 	}
 
-	return response, nil
+	// return response, nil
+	return converter.ContactToResponse(contact), nil
 }
 
 func (c *ContactUseCase) Get(ctx context.Context, request *model.GetContactRequest) (*model.ContactResponse, error) {
@@ -140,17 +155,18 @@ func (c *ContactUseCase) Get(ctx context.Context, request *model.GetContactReque
 		return nil, fiber.ErrInternalServerError
 	}
 
-	response := &model.ContactResponse{
-		ID:        contact.ID,
-		FirstName: contact.FirstName,
-		LastName:  contact.LastName,
-		Email:     contact.Email,
-		Phone:     contact.Phone,
-		CreatedAt: contact.CreatedAt,
-		UpdatedAt: contact.UpdatedAt,
-	}
+	// response := &model.ContactResponse{
+	// 	ID:        contact.ID,
+	// 	FirstName: contact.FirstName,
+	// 	LastName:  contact.LastName,
+	// 	Email:     contact.Email,
+	// 	Phone:     contact.Phone,
+	// 	CreatedAt: contact.CreatedAt,
+	// 	UpdatedAt: contact.UpdatedAt,
+	// }
 
-	return response, nil
+	// return response, nil
+	return converter.ContactToResponse(contact), nil
 }
 
 func (c *ContactUseCase) Delete(ctx context.Context, request *model.DeleteContactRequest) error {
@@ -214,15 +230,16 @@ func (c *ContactUseCase) Search(ctx context.Context, request *model.SearchContac
 
 	responses := make([]model.ContactResponse, len(contacts))
 	for i, contact := range contacts {
-		responses[i] = model.ContactResponse{
-			ID:        contact.ID,
-			FirstName: contact.FirstName,
-			LastName:  contact.LastName,
-			Email:     contact.Email,
-			Phone:     contact.Phone,
-			CreatedAt: contact.CreatedAt,
-			UpdatedAt: contact.UpdatedAt,
-		}
+		// responses[i] = model.ContactResponse{
+		// 	ID:        contact.ID,
+		// 	FirstName: contact.FirstName,
+		// 	LastName:  contact.LastName,
+		// 	Email:     contact.Email,
+		// 	Phone:     contact.Phone,
+		// 	CreatedAt: contact.CreatedAt,
+		// 	UpdatedAt: contact.UpdatedAt,
+		// }
+		responses[i] = *converter.ContactToResponse(&contact)
 	}
 
 	return responses, total, nil

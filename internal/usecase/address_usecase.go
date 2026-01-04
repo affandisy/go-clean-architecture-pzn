@@ -5,6 +5,7 @@ import (
 	"go-clean-architecture-pzn/internal/entity"
 	"go-clean-architecture-pzn/internal/gateway/messaging"
 	"go-clean-architecture-pzn/internal/model"
+	"go-clean-architecture-pzn/internal/model/converter"
 	"go-clean-architecture-pzn/internal/repository"
 
 	"github.com/go-playground/validator/v10"
@@ -71,18 +72,25 @@ func (c *AddressUseCase) Create(ctx context.Context, request *model.CreateAddres
 		return nil, fiber.ErrInternalServerError
 	}
 
-	response := &model.AddressResponse{
-		ID:         address.ID,
-		Street:     address.Street,
-		City:       address.City,
-		Province:   address.Province,
-		PostalCode: address.PostalCode,
-		Country:    address.Country,
-		CreatedAt:  address.CreatedAt,
-		UpdatedAt:  address.UpdatedAt,
+	// response := &model.AddressResponse{
+	// 	ID:         address.ID,
+	// 	Street:     address.Street,
+	// 	City:       address.City,
+	// 	Province:   address.Province,
+	// 	PostalCode: address.PostalCode,
+	// 	Country:    address.Country,
+	// 	CreatedAt:  address.CreatedAt,
+	// 	UpdatedAt:  address.UpdatedAt,
+	// }
+
+	event := converter.AddressToEvent(address)
+	if err := c.AddressProducer.Send(ctx, event); err != nil {
+		c.Log.WithError(err).Error("Failed to publish address event")
+		return nil, fiber.ErrInternalServerError
 	}
 
-	return response, nil
+	// return response, nil
+	return converter.AddressToResponse(address), nil
 }
 
 func (c *AddressUseCase) Update(ctx context.Context, request *model.UpdateAddressRequest) (*model.AddressResponse, error) {
@@ -125,18 +133,25 @@ func (c *AddressUseCase) Update(ctx context.Context, request *model.UpdateAddres
 		return nil, fiber.ErrInternalServerError
 	}
 
-	response := &model.AddressResponse{
-		ID:         address.ID,
-		Street:     address.Street,
-		City:       address.City,
-		Province:   address.Province,
-		PostalCode: address.PostalCode,
-		Country:    address.Country,
-		CreatedAt:  address.CreatedAt,
-		UpdatedAt:  address.UpdatedAt,
+	// response := &model.AddressResponse{
+	// 	ID:         address.ID,
+	// 	Street:     address.Street,
+	// 	City:       address.City,
+	// 	Province:   address.Province,
+	// 	PostalCode: address.PostalCode,
+	// 	Country:    address.Country,
+	// 	CreatedAt:  address.CreatedAt,
+	// 	UpdatedAt:  address.UpdatedAt,
+	// }
+
+	event := converter.AddressToEvent(address)
+	if err := c.AddressProducer.Send(ctx, event); err != nil {
+		c.Log.WithError(err).Error("Failed to publish address event")
+		return nil, fiber.ErrInternalServerError
 	}
 
-	return response, nil
+	// return response, nil
+	return converter.AddressToResponse(address), nil
 }
 
 func (c *AddressUseCase) Get(ctx context.Context, request *model.GetAddressRequest) (*model.AddressResponse, error) {
@@ -162,18 +177,19 @@ func (c *AddressUseCase) Get(ctx context.Context, request *model.GetAddressReque
 		return nil, fiber.ErrInternalServerError
 	}
 
-	response := &model.AddressResponse{
-		ID:         address.ID,
-		Street:     address.Street,
-		City:       address.City,
-		Province:   address.Province,
-		PostalCode: address.PostalCode,
-		Country:    address.Country,
-		CreatedAt:  address.CreatedAt,
-		UpdatedAt:  address.UpdatedAt,
-	}
+	// response := &model.AddressResponse{
+	// 	ID:         address.ID,
+	// 	Street:     address.Street,
+	// 	City:       address.City,
+	// 	Province:   address.Province,
+	// 	PostalCode: address.PostalCode,
+	// 	Country:    address.Country,
+	// 	CreatedAt:  address.CreatedAt,
+	// 	UpdatedAt:  address.UpdatedAt,
+	// }
 
-	return response, nil
+	// return response, nil
+	return converter.AddressToResponse(address), nil
 }
 
 func (c *AddressUseCase) Delete(ctx context.Context, request *model.DeleteAddressRequest) error {
@@ -234,16 +250,17 @@ func (c *AddressUseCase) List(ctx context.Context, request *model.ListAddressReq
 
 	responses := make([]model.AddressResponse, len(addresses))
 	for i, address := range addresses {
-		responses[i] = model.AddressResponse{
-			ID:         address.ID,
-			Street:     address.Street,
-			City:       address.City,
-			Province:   address.Province,
-			PostalCode: address.PostalCode,
-			Country:    address.Country,
-			CreatedAt:  address.CreatedAt,
-			UpdatedAt:  address.UpdatedAt,
-		}
+		// responses[i] = model.AddressResponse{
+		// 	ID:         address.ID,
+		// 	Street:     address.Street,
+		// 	City:       address.City,
+		// 	Province:   address.Province,
+		// 	PostalCode: address.PostalCode,
+		// 	Country:    address.Country,
+		// 	CreatedAt:  address.CreatedAt,
+		// 	UpdatedAt:  address.UpdatedAt,
+		// }
+		responses[i] = *converter.AddressToResponse(&address)
 	}
 
 	return responses, nil

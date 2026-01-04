@@ -1,9 +1,7 @@
 package config
 
 import (
-	"context"
 	"strings"
-	"time"
 
 	"github.com/segmentio/kafka-go"
 	"github.com/sirupsen/logrus"
@@ -43,47 +41,6 @@ func NewKafkaConsumer(config *viper.Viper, log *logrus.Logger, topic string) *ka
 	})
 
 	return reader
-}
-
-func ConsumeTopic(signal chan string, consumer *kafka.Reader, topic string, log *logrus.Logger, handler func(message *kafka.Message) error) {
-	log.Infof("Starting to consume from topic: %s", topic)
-
-	stop := false
-
-	for !stop {
-		select {
-		case <-signal:
-			log.Info("Got one of stop signals, shutting down consumer gracefully")
-			stop = true
-		default:
-			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-			message, err := consumer.ReadMessage(ctx)
-			cancel()
-			if err == nil {
-				log.Debugf("Received message from topic %s: partition=%d offset=%d", topic, message.Partition, message.Offset)
-
-				err := handler(&message)
-				if err != nil {
-					log.Errorf("Failed to process message from partition %d offset %d: %v", message.Partition, message.Offset, err)
-				} else {
-					log.Debugf("Successfully processed message from partition %d offset %d", message.Partition, message.Offset)
-				}
-			} else {
-				// Check if error is timeout (which is normal)
-				if kafkaErr, ok := err.(kafka.Error); ok && kafkaErr.Timeout() {
-					// Timeout is expected, continue
-					continue
-				}
-				log.Warnf("Consumer error while reading message: %v", err)
-			}
-		}
-	}
-
-	log.Info("Closing consumer")
-	err := consumer.Close()
-	if err != nil {
-		log.Errorf("Failed to close consumer: %v", err)
-	}
 }
 
 func NewKafkaProducer(config *viper.Viper, log *logrus.Logger) (*kafka.Writer, error) {
