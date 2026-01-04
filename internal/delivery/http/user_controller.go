@@ -29,7 +29,7 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	response, err := c.UseCase.Create(request)
+	response, err := c.UseCase.Create(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.Warnf("Failed to register user: %+v", err)
 		return err
@@ -46,7 +46,7 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	response, err := c.UseCase.Login(request)
+	response, err := c.UseCase.Login(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.Warnf("Failed to login user: %+v", err)
 		return err
@@ -59,7 +59,12 @@ func (c *UserController) Current(ctx *fiber.Ctx) error {
 
 	user := ctx.Locals("user").(*entity.User)
 
-	response, err := c.UseCase.Current(user)
+	// response, err := c.UseCase.Current(user)
+	request := &model.GetUserRequest{
+		ID: user.ID,
+	}
+
+	response, err := c.UseCase.Current(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.WithError(err).Warnf("Failed to get current user")
 		return err
@@ -72,7 +77,13 @@ func (c *UserController) Logout(ctx *fiber.Ctx) error {
 
 	user := ctx.Locals("user").(*entity.User)
 
-	response, err := c.UseCase.Logout(user)
+	// response, err := c.UseCase.Logout(user)
+
+	request := &model.LogoutUserRequest{
+		ID: user.ID,
+	}
+
+	response, err := c.UseCase.Logout(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.WithError(err).Warnf("Failed to logout user")
 		return err
@@ -90,7 +101,9 @@ func (c *UserController) Update(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	response, err := c.UseCase.Update(user, request)
+	request.ID := user.ID
+
+	response, err := c.UseCase.Update(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.WithError(err).Warnf("Failed to update user")
 		return err

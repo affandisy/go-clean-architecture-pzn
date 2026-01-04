@@ -2,9 +2,10 @@ package test
 
 import (
 	"fmt"
-	"go-clean-architecture-pzn/internal"
+	config "go-clean-architecture-pzn/internal/config"
 	http "go-clean-architecture-pzn/internal/delivery/http"
 	"go-clean-architecture-pzn/internal/delivery/http/middleware"
+	route "go-clean-architecture-pzn/internal/delivery/http/route"
 	"go-clean-architecture-pzn/internal/usecase"
 
 	"github.com/go-playground/validator/v10"
@@ -27,21 +28,21 @@ var validate *validator.Validate
 func init() {
 	var err error
 
-	viperConfig, err = internal.NewViper()
+	viperConfig, err = config.NewViper()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error viperConfig file: %w", err))
 	}
 
-	log = internal.NewLogger(viperConfig)
-	validate = internal.NewValidator(viperConfig)
-	app = internal.NewFiber(viperConfig)
+	log = config.NewLogger(viperConfig)
+	validate = config.NewValidator(viperConfig)
+	app = config.NewFiber(viperConfig)
 
-	db, err = internal.NewDatabase(viperConfig, log)
+	db, err = config.NewDatabase(viperConfig, log)
 	if err != nil {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}
 
-	routeConfig := internal.RouteConfig{
+	routeConfig := route.RouteConfig{
 		App: app,
 		// UserController:    controller.NewUserController(db, validate, log),
 		UserController: http.NewUserController(usecase.NewUserUseCase(db, log, validate), log),

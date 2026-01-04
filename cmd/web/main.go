@@ -3,35 +3,36 @@ package main
 import (
 	"fmt"
 
-	"go-clean-architecture-pzn/internal"
+	config "go-clean-architecture-pzn/internal/config"
 	http "go-clean-architecture-pzn/internal/delivery/http"
 	"go-clean-architecture-pzn/internal/delivery/http/middleware"
+	route "go-clean-architecture-pzn/internal/delivery/http/route"
 	"go-clean-architecture-pzn/internal/usecase"
 )
 
 func main() {
 	// viperConfig, err := internal.New()
-	config, err := internal.NewViper()
+	_config, err := config.NewViper()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %w", err))
 	}
 
-	log := internal.NewLogger(config)
+	log := config.NewLogger(_config)
 	log.Info("Start application")
 
-	db, err := internal.NewDatabase(config, log)
+	db, err := config.NewDatabase(_config, log)
 	if err != nil {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}
 
 	// validator := internal.NewValidator(viperConfig)
-	validate := internal.NewValidator(config)
+	validate := config.NewValidator(_config)
 
-	webPort := config.GetInt("web.port")
+	webPort := _config.GetInt("web.port")
 
-	app := internal.NewFiber(config)
+	app := config.NewFiber(_config)
 
-	routeConfig := internal.RouteConfig{
+	routeConfig := route.RouteConfig{
 		App: app,
 		// UserController:    controller.NewUserController(db, validate, log),
 		UserController: http.NewUserController(usecase.NewUserUseCase(db, log, validate), log),

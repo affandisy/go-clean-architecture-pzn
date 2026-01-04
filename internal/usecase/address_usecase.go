@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"go-clean-architecture-pzn/internal/entity"
 	"go-clean-architecture-pzn/internal/model"
 
@@ -25,7 +26,7 @@ func NewAddressUseCase(db *gorm.DB, logger *logrus.Logger, validate *validator.V
 	}
 }
 
-func (c *AddressUseCase) Create(user *entity.User, request *model.CreateAddressRequest) (*model.AddressResponse, error) {
+func (c *AddressUseCase) Create(ctx context.Context, user *entity.User, request *model.CreateAddressRequest) (*model.AddressResponse, error) {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
@@ -74,7 +75,7 @@ func (c *AddressUseCase) Create(user *entity.User, request *model.CreateAddressR
 	return response, nil
 }
 
-func (c *AddressUseCase) Update(user *entity.User, request *model.UpdateAddressRequest) (*model.AddressResponse, error) {
+func (c *AddressUseCase) Update(ctx context.Context, user *entity.User, request *model.UpdateAddressRequest) (*model.AddressResponse, error) {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
@@ -125,7 +126,7 @@ func (c *AddressUseCase) Update(user *entity.User, request *model.UpdateAddressR
 	return response, nil
 }
 
-func (c *AddressUseCase) Get(user *entity.User, contactId string, addressId string) (*model.AddressResponse, error) {
+func (c *AddressUseCase) Get(ctx context.Context, user *entity.User, contactId string, addressId string) (*model.AddressResponse, error) {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
@@ -160,7 +161,7 @@ func (c *AddressUseCase) Get(user *entity.User, contactId string, addressId stri
 	return response, nil
 }
 
-func (c *AddressUseCase) Delete(user *entity.User, contactId string, addressId string) error {
+func (c *AddressUseCase) Delete(ctx context.Context, user *entity.User, contactId string, addressId string) error {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
@@ -189,7 +190,7 @@ func (c *AddressUseCase) Delete(user *entity.User, contactId string, addressId s
 	return nil
 }
 
-func (c *AddressUseCase) List(user *entity.User, contactId string) ([]model.AddressResponse, error) {
+func (c *AddressUseCase) List(ctx context.Context, user *entity.User, contactId string) ([]model.AddressResponse, error) {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 

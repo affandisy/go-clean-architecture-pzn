@@ -4,7 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"go-clean-architecture-pzn/internal"
+	config "go-clean-architecture-pzn/internal/config"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
@@ -15,15 +15,15 @@ import (
 var fs embed.FS
 
 func main() {
-	viper, err := internal.NewViper()
+	viper, err := config.NewViper()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error viper file: %w", err))
 	}
 
-	log := internal.NewLogger(viper)
+	log := config.NewLogger(viper)
 	log.Info("Start migration")
 
-	db, err := internal.NewDatabase(viper, log)
+	db, err := config.NewDatabase(viper, log)
 	if err != nil {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}

@@ -1,6 +1,6 @@
 package product
 
-import "go-clean-architecture-pzn/entity"
+import "go-clean-architecture-pzn/internal/entity"
 
 type ProductRepository interface {
 	Insert(product entity.Product)
