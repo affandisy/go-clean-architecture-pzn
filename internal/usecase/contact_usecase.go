@@ -26,7 +26,7 @@ func NewContactUseCase(db *gorm.DB, logger *logrus.Logger, validate *validator.V
 	}
 }
 
-func (c *ContactUseCase) Create(ctx context.Context, user *entity.User, request *model.CreateContactRequest) (*model.ContactResponse, error) {
+func (c *ContactUseCase) Create(ctx context.Context, request *model.CreateContactRequest) (*model.ContactResponse, error) {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
@@ -67,12 +67,12 @@ func (c *ContactUseCase) Create(ctx context.Context, user *entity.User, request 
 	return response, nil
 }
 
-func (c *ContactUseCase) Update(ctx context.Context, user *entity.User, request *model.UpdateContactRequest) (*model.ContactResponse, error) {
-	tx := c.DB.Begin()
+func (c *ContactUseCase) Update(ctx context.Context, request *model.UpdateContactRequest) (*model.ContactResponse, error) {
+	tx := c.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	contact := new(entity.Contact)
-	if err := tx.Where("id = ? AND user_id = ?", request.ID, user.ID).Take(contact).Error; err != nil {
+	if err := tx.Where("id = ? AND user_id = ?", request.ID, request.UserId).Take(contact).Error; err != nil {
 		c.Log.WithError(err).Error("error getting contact")
 		return nil, fiber.ErrNotFound
 	}
@@ -110,12 +110,12 @@ func (c *ContactUseCase) Update(ctx context.Context, user *entity.User, request 
 	return response, nil
 }
 
-func (c *ContactUseCase) Get(ctx context.Context, user *entity.User, contactId string) (*model.ContactResponse, error) {
-	tx := c.DB.Begin()
+func (c *ContactUseCase) Get(ctx context.Context, request *model.GetContactRequest) (*model.ContactResponse, error) {
+	tx := c.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	contact := new(entity.Contact)
-	if err := tx.Where("id = ? AND user_id = ?", contactId, user.ID).Take(contact).Error; err != nil {
+	if err := tx.Where("id = ? AND user_id = ?", request.ID, request.UserId).Take(contact).Error; err != nil {
 		c.Log.WithError(err).Error("error getting contact")
 		return nil, fiber.ErrNotFound
 	}
@@ -139,7 +139,7 @@ func (c *ContactUseCase) Get(ctx context.Context, user *entity.User, contactId s
 }
 
 func (c *ContactUseCase) Delete(ctx context.Context, user *entity.User, contactId string) error {
-	tx := c.DB.Begin()
+	tx := c.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	contact := new(entity.Contact)
@@ -162,7 +162,7 @@ func (c *ContactUseCase) Delete(ctx context.Context, user *entity.User, contactI
 }
 
 func (c *ContactUseCase) Search(ctx context.Context, user *entity.User, request *model.SearchContactRequest) ([]model.ContactResponse, int64, error) {
-	tx := c.DB.Begin()
+	tx := c.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	if err := c.Validate.Struct(request); err != nil {
@@ -171,13 +171,13 @@ func (c *ContactUseCase) Search(ctx context.Context, user *entity.User, request 
 	}
 
 	var contacts []entity.Contact
-	if err := tx.Scopes(c.filterContact(request)).Offset((request.Page - 1) * request.Size).Limit(request.Size).Find(&contacts).Error; err != nil {
+	if err := tx.Scopes(c.FilterContact(request)).Offset((request.Page - 1) * request.Size).Limit(request.Size).Find(&contacts).Error; err != nil {
 		c.Log.WithError(err).Error("error getting contacts")
 		return nil, 0, fiber.ErrInternalServerError
 	}
 
 	var total int64 = 0
-	if err := tx.Model(&entity.Contact{}).Scopes(c.filterContact(request)).Count(&total).Error; err != nil {
+	if err := tx.Model(&entity.Contact{}).Scopes(c.FilterContact(request)).Count(&total).Error; err != nil {
 		c.Log.WithError(err).Error("error getting total contacts")
 		return nil, 0, fiber.ErrInternalServerError
 	}
@@ -203,7 +203,7 @@ func (c *ContactUseCase) Search(ctx context.Context, user *entity.User, request 
 	return responses, total, nil
 }
 
-func (c *ContactUseCase) filterContact(request *model.SearchContactRequest) func(tx *gorm.DB) *gorm.DB {
+func (c *ContactUseCase) FilterContact(request *model.SearchContactRequest) func(tx *gorm.DB) *gorm.DB {
 	return func(tx *gorm.DB) *gorm.DB {
 		tx = tx.Where("user_id=?", request.UserId)
 

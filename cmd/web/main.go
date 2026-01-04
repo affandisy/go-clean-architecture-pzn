@@ -4,46 +4,50 @@ import (
 	"fmt"
 
 	config "go-clean-architecture-pzn/internal/config"
-	http "go-clean-architecture-pzn/internal/delivery/http"
-	"go-clean-architecture-pzn/internal/delivery/http/middleware"
-	route "go-clean-architecture-pzn/internal/delivery/http/route"
-	"go-clean-architecture-pzn/internal/usecase"
 )
 
 func main() {
 	// viperConfig, err := internal.New()
-	_config, err := config.NewViper()
+	viperConfig, err := config.NewViper()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %w", err))
 	}
 
-	log := config.NewLogger(_config)
+	log := config.NewLogger(viperConfig)
 	log.Info("Start application")
 
-	db, err := config.NewDatabase(_config, log)
+	db, err := config.NewDatabase(viperConfig, log)
 	if err != nil {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}
 
 	// validator := internal.NewValidator(viperConfig)
-	validate := config.NewValidator(_config)
+	validate := config.NewValidator(viperConfig)
 
-	webPort := _config.GetInt("web.port")
+	webPort := viperConfig.GetInt("web.port")
 
-	app := config.NewFiber(_config)
+	app := config.NewFiber(viperConfig)
 
-	routeConfig := route.RouteConfig{
-		App: app,
-		// UserController:    controller.NewUserController(db, validate, log),
-		UserController: http.NewUserController(usecase.NewUserUseCase(db, log, validate), log),
-		// ContactController: controller.NewContactController(db, validate, log),
-		ContactController: http.NewContactController(usecase.NewContactUseCase(db, log, validate), log),
-		// AddressController: controller.NewAddressController(db, validate, log),
-		AddressController: http.NewAddressController(usecase.NewAddressUseCase(db, log, validate), log),
-		AuthMiddleware:    middleware.NewAuth(db, log),
-	}
+	config.Bootstrap(&config.BootstrapConfig{
+		DB:       db,
+		App:      app,
+		Log:      log,
+		Validate: validate,
+		Config:   viperConfig,
+	})
 
-	routeConfig.Setup()
+	// routeConfig := route.RouteConfig{
+	// 	App: app,
+	// 	// UserController:    controller.NewUserController(db, validate, log),
+	// 	UserController: http.NewUserController(usecase.NewUserUseCase(db, log, validate), log),
+	// 	// ContactController: controller.NewContactController(db, validate, log),
+	// 	ContactController: http.NewContactController(usecase.NewContactUseCase(db, log, validate), log),
+	// 	// AddressController: controller.NewAddressController(db, validate, log),
+	// 	AddressController: http.NewAddressController(usecase.NewAddressUseCase(db, log, validate), log),
+	// 	AuthMiddleware:    middleware.NewAuth(db, log),
+	// }
+
+	// routeConfig.Setup()
 
 	// regis route
 	// err = route.User(app)

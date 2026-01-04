@@ -8,6 +8,7 @@ import (
 )
 
 type AddressRepository struct {
+	Repository[entity.Address]
 	Log *logrus.Logger
 }
 

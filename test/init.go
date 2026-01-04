@@ -3,10 +3,6 @@ package test
 import (
 	"fmt"
 	config "go-clean-architecture-pzn/internal/config"
-	http "go-clean-architecture-pzn/internal/delivery/http"
-	"go-clean-architecture-pzn/internal/delivery/http/middleware"
-	route "go-clean-architecture-pzn/internal/delivery/http/route"
-	"go-clean-architecture-pzn/internal/usecase"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -42,16 +38,24 @@ func init() {
 		panic(fmt.Errorf("Fatal error database: %w", err))
 	}
 
-	routeConfig := route.RouteConfig{
-		App: app,
-		// UserController:    controller.NewUserController(db, validate, log),
-		UserController: http.NewUserController(usecase.NewUserUseCase(db, log, validate), log),
-		// ContactController: controller.NewContactController(db, validate, log),
-		ContactController: http.NewContactController(usecase.NewContactUseCase(db, log, validate), log),
-		// AddressController: controller.NewAddressController(db, validate, log),
-		AddressController: http.NewAddressController(usecase.NewAddressUseCase(db, log, validate), log),
-		AuthMiddleware:    middleware.NewAuth(db, log),
-	}
+	// routeConfig := route.RouteConfig{
+	// 	App: app,
+	// 	// UserController:    controller.NewUserController(db, validate, log),
+	// 	UserController: http.NewUserController(usecase.NewUserUseCase(db, log, validate), log),
+	// 	// ContactController: controller.NewContactController(db, validate, log),
+	// 	ContactController: http.NewContactController(usecase.NewContactUseCase(db, log, validate), log),
+	// 	// AddressController: controller.NewAddressController(db, validate, log),
+	// 	AddressController: http.NewAddressController(usecase.NewAddressUseCase(db, log, validate), log),
+	// 	AuthMiddleware:    middleware.NewAuth(db, log),
+	// }
 
-	routeConfig.Setup()
+	config.Bootstrap(&config.BootstrapConfig{
+		DB:       db,
+		App:      app,
+		Log:      log,
+		Validate: validate,
+		Config:   viperConfig,
+	})
+
+	// routeConfig.Setup()
 }

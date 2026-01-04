@@ -1,8 +1,9 @@
 package repository
 
 import (
+	"go-clean-architecture-pzn/internal/entity"
+
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 // UserRepository is an interface for user repository contract
@@ -16,6 +17,13 @@ import (
 // }
 
 type UserRepository struct {
-	DB  *gorm.DB
+	// DB  *gorm.DB
+	Repository[entity.User]
 	Log *logrus.Logger
+}
+
+func NewUserRepository(log *logrus.Logger) *UserRepository {
+	return &UserRepository{
+		Log: log,
+	}
 }

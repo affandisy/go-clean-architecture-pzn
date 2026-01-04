@@ -101,7 +101,7 @@ func (c *UserController) Update(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	request.ID := user.ID
+	request.ID = user.ID
 
 	response, err := c.UseCase.Update(ctx.UserContext(), request)
 	if err != nil {
