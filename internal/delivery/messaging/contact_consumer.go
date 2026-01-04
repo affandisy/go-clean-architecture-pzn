@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"go-clean-architecture-pzn/internal/model"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,13 +18,14 @@ func NewContactConsumer(log *logrus.Logger) *ContactConsumer {
 	}
 }
 
-func (c ContactConsumer) Consume(message *kafka.Message) error {
+func (c ContactConsumer) Consume(message *sarama.ConsumerMessage) error {
 	ContactEvent := new(model.ContactEvent)
 	if err := json.Unmarshal(message.Value, ContactEvent); err != nil {
 		c.Log.WithError(err).Error("error unmarshalling Contact event")
 		return err
 	}
 
-	c.Log.Infof("Received topic Contact with event: %v from partition %d", ContactEvent, message.Partition)
+	// c.Log.Infof("Received topic Contact with event: %v from partition %d", ContactEvent, message.Partition)
+	c.Log.Infof("Received topic contacts with event: %v from partition %d", ContactEvent, message.Partition)
 	return nil
 }

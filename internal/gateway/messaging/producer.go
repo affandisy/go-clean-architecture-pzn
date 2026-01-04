@@ -3,15 +3,15 @@ package messaging
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"go-clean-architecture-pzn/internal/model"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 )
 
 type Producer[T model.Event] struct {
-	Producer *kafka.Writer
+	// Producer *kafka.Writer
+	Producer sarama.SyncProducer
 	Topic    string
 	Log      *logrus.Logger
 }
@@ -23,18 +23,18 @@ func (p *Producer[T]) Send(ctx context.Context, event T) error {
 		return err
 	}
 
-	message := kafka.Message{
+	message := &sarama.ProducerMessage{
 		Topic: p.Topic,
-		Key:   []byte(event.GetId()),
-		Value: jsonData,
+		Key:   sarama.StringEncoder(event.GetId()),
+		Value: sarama.ByteEncoder(jsonData),
 	}
 
-	err = p.Producer.WriteMessages(ctx, message)
+	partition, offset, err := p.Producer.SendMessage(message)
 	if err != nil {
-		p.Log.Errorf("Failed to send message to topic %s: %v", p.Topic, err)
-		return fmt.Errorf("failed to send message: %w", err)
+		p.Log.WithError(err).Error("failed to produce message")
+		return err
 	}
 
-	p.Log.Infof("Successfully sent message to topic %s with key %s", p.Topic, event.GetId())
+	p.Log.Debugf("Message sent to topic %s, partition %d, offset %d", p.Topic, partition, offset)
 	return nil
 }

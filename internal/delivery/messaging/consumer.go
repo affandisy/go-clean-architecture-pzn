@@ -2,50 +2,74 @@ package messaging
 
 import (
 	"context"
-	"time"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 )
 
-func ConsumeTopic(ctx context.Context, consumer *kafka.Reader, topic string, log *logrus.Logger, handler func(message *kafka.Message) error) {
-	log.Infof("Starting to consume from topic: %s", topic)
+type ConsumerHandler func(message *sarama.ConsumerMessage) error
 
-	// stop := false
-	run := true
+type ConsumerGroupHandler struct {
+	Handler ConsumerHandler
+	Log     *logrus.Logger
+}
 
-	for run {
+func (h *ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error {
+	return nil
+}
+
+func (h *ConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error {
+	return nil
+}
+
+func (h *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for {
 		select {
-		case <-ctx.Done():
-			// log.Info("Got one of stop signals, shutting down consumer gracefully")
-			run = false
-		default:
-			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-			message, err := consumer.ReadMessage(ctx)
-			cancel()
-			if err == nil {
-				log.Debugf("Received message from topic %s: partition=%d offset=%d", topic, message.Partition, message.Offset)
-
-				err := handler(&message)
-				if err != nil {
-					log.Errorf("Failed to process message from partition %d offset %d: %v", message.Partition, message.Offset, err)
-				} else {
-					log.Debugf("Successfully processed message from partition %d offset %d", message.Partition, message.Offset)
-				}
-			} else {
-				// Check if error is timeout (which is normal)
-				if kafkaErr, ok := err.(kafka.Error); ok && kafkaErr.Timeout() {
-					// Timeout is expected, continue
-					continue
-				}
-				log.Warnf("Consumer error while reading message: %v", err)
+		case message := <-claim.Messages():
+			if message == nil {
+				return nil
 			}
+
+			err := h.Handler(message)
+			if err != nil {
+				h.Log.WithError(err).Error("Failed to process message")
+			} else {
+				session.MarkMessage(message, "")
+			}
+
+		case <-session.Context().Done():
+			return nil
 		}
 	}
+}
 
-	log.Infof("Closing consumer for topic: %s", topic)
-	err := consumer.Close()
-	if err != nil {
-		log.Errorf("Failed to close consumer: %v", err)
+func ConsumeTopic(ctx context.Context, consumerGroup sarama.ConsumerGroup, topic string, log *logrus.Logger, handler ConsumerHandler) {
+	consumerHandler := &ConsumerGroupHandler{
+		Handler: handler,
+		Log:     log,
+	}
+
+	go func() {
+		for {
+			if err := consumerGroup.Consume(ctx, []string{topic}, consumerHandler); err != nil {
+				log.WithError(err).Error("Error from consumer")
+			}
+
+			if ctx.Err() != nil {
+				log.Info("Context cancelled, stopping consumer")
+				return
+			}
+		}
+	}()
+
+	go func() {
+		for err := range consumerGroup.Errors() {
+			log.WithError(err).Error("Consumer group error")
+		}
+	}()
+	<-ctx.Done()
+	log.Infof("Closing consumer group for topic: %s", topic)
+	if err := consumerGroup.Close(); err != nil {
+		log.WithError(err).Error("Error closing consumer group")
 	}
 }

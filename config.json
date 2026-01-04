@@ -23,6 +23,9 @@
     },
     "kafka": {
         "brokers": ["localhost:9092"],
-        "topic": "golang-clean-architecture"
+        "topic": "golang-clean-architecture",
+        "producer": {
+            "enabled": false
+        }
     }
 }

@@ -8,9 +8,9 @@ import (
 	"go-clean-architecture-pzn/internal/repository"
 	"go-clean-architecture-pzn/internal/usecase"
 
+	"github.com/IBM/sarama"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/segmentio/kafka-go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
@@ -22,7 +22,7 @@ type BootstrapConfig struct {
 	Log      *logrus.Logger
 	Validate *validator.Validate
 	Config   *viper.Viper
-	Producer *kafka.Writer
+	Producer sarama.SyncProducer
 }
 
 func Bootstrap(config *BootstrapConfig) {
@@ -32,9 +32,20 @@ func Bootstrap(config *BootstrapConfig) {
 	addressRepository := repository.NewAddressRepository(config.Log)
 
 	// setup producer
-	userProducer := messaging.NewUserProducer(config.Producer, config.Log)
-	contactProducer := messaging.NewContactProducer(config.Producer, config.Log)
-	addressProducer := messaging.NewAddressProducer(config.Producer, config.Log)
+	// userProducer := messaging.NewUserProducer(config.Producer, config.Log)
+	// contactProducer := messaging.NewContactProducer(config.Producer, config.Log)
+	// addressProducer := messaging.NewAddressProducer(config.Producer, config.Log)
+
+	// setup producer
+	var userProducer *messaging.UserProducer
+	var contactProducer *messaging.ContactProducer
+	var addressProducer *messaging.AddressProducer
+
+	if config.Producer != nil {
+		userProducer = messaging.NewUserProducer(config.Producer, config.Log)
+		contactProducer = messaging.NewContactProducer(config.Producer, config.Log)
+		addressProducer = messaging.NewAddressProducer(config.Producer, config.Log)
+	}
 
 	// setup use case
 	userUseCase := usecase.NewUserUseCase(config.DB, config.Log, config.Validate, userRepository, userProducer)

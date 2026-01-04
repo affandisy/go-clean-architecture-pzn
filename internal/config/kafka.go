@@ -3,55 +3,48 @@ package config
 import (
 	"strings"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-func NewKafkaConsumerGroup(config *viper.Viper, log *logrus.Logger) (*kafka.Reader, error) {
-	brokers := strings.Split(config.GetString("kafka.bootstrap.servers"), ",")
-	groupID := config.GetString("kafka.group.id")
-	topic := config.GetString("kafka.topic")
+func NewKafkaConsumerGroup(config *viper.Viper, log *logrus.Logger) sarama.ConsumerGroup {
+	saramaConfig := sarama.NewConfig()
+	saramaConfig.Consumer.Return.Errors = true
 
-	log.Infof("Initializing Kafka consumer with brokers: %v, groupID: %s, topic: %s", brokers, groupID, topic)
-
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  brokers,
-		GroupID:  groupID,
-		Topic:    topic,
-		MinBytes: 10e3, // 10KB
-		MaxBytes: 10e6, // 10MB
-	})
-
-	return reader, nil
-}
-
-func NewKafkaConsumer(config *viper.Viper, log *logrus.Logger, topic string) *kafka.Reader {
+	offsetReset := config.GetString("kafka.auto.offset.reset")
+	if offsetReset == "earliest" {
+		saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	} else {
+		saramaConfig.Consumer.Offsets.Initial = sarama.OffsetNewest
+	}
 	brokers := strings.Split(config.GetString("kafka.bootstrap.servers"), ",")
 	groupID := config.GetString("kafka.group.id")
 
-	log.Infof("Initializing Kafka consumer with brokers: %v, groupID: %s, topic: %s", brokers, groupID, topic)
-
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  brokers,
-		GroupID:  groupID,
-		Topic:    topic,
-		MinBytes: 10e3, // 10KB
-		MaxBytes: 10e6, // 10MB
-	})
-
-	return reader
+	consumerGroup, err := sarama.NewConsumerGroup(brokers, groupID, saramaConfig)
+	if err != nil {
+		log.Fatalf("Failed to create consumer group: %v", err)
+	}
+	return consumerGroup
 }
 
-func NewKafkaProducer(config *viper.Viper, log *logrus.Logger) (*kafka.Writer, error) {
-	brokers := strings.Split(config.GetString("kafka.bootstrap.servers"), ",")
-
-	log.Infof("Initializing Kafka producer with brokers: %v", brokers)
-
-	writer := &kafka.Writer{
-		Addr:     kafka.TCP(brokers...),
-		Balancer: &kafka.LeastBytes{},
+func NewKafkaProducer(config *viper.Viper, log *logrus.Logger) sarama.SyncProducer {
+	if !config.GetBool("kafka.producer.enabled") {
+		log.Info("Kafka producer is disabled")
+		return nil
 	}
 
-	return writer, nil
+	saramaConfig := sarama.NewConfig()
+	saramaConfig.Producer.Return.Successes = true
+	saramaConfig.Producer.RequiredAcks = sarama.WaitForAll
+	saramaConfig.Producer.Retry.Max = 3
+
+	brokers := strings.Split(config.GetString("kafka.bootstrap.servers"), ",")
+
+	producer, err := sarama.NewSyncProducer(brokers, saramaConfig)
+	if err != nil {
+		log.Fatalf("Failed to create producer: %v", err)
+	}
+
+	return producer
 }

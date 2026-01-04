@@ -3,7 +3,7 @@ package messaging
 import (
 	"go-clean-architecture-pzn/internal/model"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 )
 
@@ -11,7 +11,7 @@ type AddressProducer struct {
 	Producer[*model.AddressEvent]
 }
 
-func NewAddressProducer(producer *kafka.Writer, log *logrus.Logger) *AddressProducer {
+func NewAddressProducer(producer sarama.SyncProducer, log *logrus.Logger) *AddressProducer {
 	return &AddressProducer{
 		Producer: Producer[*model.AddressEvent]{
 			Producer: producer,

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"go-clean-architecture-pzn/internal/model"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,13 +18,14 @@ func NewUserConsumer(log *logrus.Logger) *UserConsumer {
 	}
 }
 
-func (c UserConsumer) Consume(message *kafka.Message) error {
+func (c UserConsumer) Consume(message *sarama.ConsumerMessage) error {
 	UserEvent := new(model.UserEvent)
 	if err := json.Unmarshal(message.Value, UserEvent); err != nil {
 		c.Log.WithError(err).Error("error unmarshalling User event")
 		return err
 	}
 
-	c.Log.Infof("Received topic user with event: %v from partition %d", UserEvent, message.Partition)
+	// c.Log.Infof("Received topic user with event: %v from partition %d", UserEvent, message.Partition)
+	c.Log.Infof("Received topic users with event: %v from partition %d", UserEvent, message.Partition)
 	return nil
 }

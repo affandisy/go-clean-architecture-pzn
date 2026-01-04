@@ -3,7 +3,7 @@ package messaging
 import (
 	"go-clean-architecture-pzn/internal/model"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 )
 
@@ -11,7 +11,7 @@ type UserProducer struct {
 	Producer[*model.UserEvent]
 }
 
-func NewUserProducer(producer *kafka.Writer, log *logrus.Logger) *UserProducer {
+func NewUserProducer(producer sarama.SyncProducer, log *logrus.Logger) *UserProducer {
 	return &UserProducer{
 		Producer: Producer[*model.UserEvent]{
 			Producer: producer,
