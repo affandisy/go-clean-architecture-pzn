@@ -3,7 +3,7 @@ package usecase
 import (
 	"go-clean-architecture-pzn/internal/entity"
 	"go-clean-architecture-pzn/internal/model"
-	productRepo "go-clean-architecture-pzn/module/product"
+	productRepo "go-clean-architecture-pzn/internal/module/product"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"go-clean-architecture-pzn/exception"
+	"go-clean-architecture-pzn/internal/exception"
 	"go-clean-architecture-pzn/internal/model"
 	productSvc "go-clean-architecture-pzn/module/product/usecase"
 

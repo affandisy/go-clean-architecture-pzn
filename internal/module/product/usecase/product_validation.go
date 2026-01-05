@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"go-clean-architecture-pzn/exception"
+	"go-clean-architecture-pzn/internal/exception"
 	"go-clean-architecture-pzn/internal/model"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"

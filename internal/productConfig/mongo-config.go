@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"go-clean-architecture-pzn/exception"
+	"go-clean-architecture-pzn/internal/exception"
 	"os"
 	"strconv"
 	"time"

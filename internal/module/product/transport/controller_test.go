@@ -1,9 +1,9 @@
 package controller
 
 import (
-	configMongo "go-clean-architecture-pzn/app"
-	productRepo "go-clean-architecture-pzn/module/product/datasource"
-	productSvc "go-clean-architecture-pzn/module/product/usecase"
+	productRepo "go-clean-architecture-pzn/internal/module/product/datasource"
+	productSvc "go-clean-architecture-pzn/internal/module/product/usecase"
+	configMongo "go-clean-architecture-pzn/internal/productConfig"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
